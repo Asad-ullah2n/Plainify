@@ -3,7 +3,7 @@ import React from 'react';
 import {color} from '../constants/color';
 import {verticalScale} from '../constants/scalling';
 
-const Button = ({onPress, title, backgroundColor}) => {
+const Button = ({onPress, title, backgroundColor, style}) => {
   return (
     <Pressable
       style={({pressed}) => [
@@ -12,6 +12,7 @@ const Button = ({onPress, title, backgroundColor}) => {
         backgroundColor
           ? {backgroundColor: backgroundColor}
           : {backgroundColor: color.purple},
+        style,
       ]}
       onPress={onPress}>
       <Text style={styles.title}>{title}</Text>

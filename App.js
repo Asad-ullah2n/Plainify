@@ -1,26 +1,23 @@
 import 'react-native-gesture-handler';
 import * as React from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import Onboarding from './src/screens/auth/Onboarding/Onboarding';
-import Signin from './src/screens/auth/Signin';
-import Signup from './src/screens/auth/Signup';
-
-const Stack = createNativeStackNavigator();
-
+import {NavigationContainer, DefaultTheme} from '@react-navigation/native';
+import AuthNavigation from './src/navigation/AuthNavigation';
+import {Provider} from 'react-redux';
+import {store} from './src/Redux/store';
+const theme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: '#ffffff',
+  },
+};
 function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{headerShown: false}}>
-        <Stack.Screen
-          name="onBoarding"
-          component={Onboarding}
-          options={{headerShown: false}}
-        />
-        <Stack.Screen name="Sign In" component={Signin} />
-        <Stack.Screen name="Sign Up" component={Signup} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Provider store={store}>
+      <NavigationContainer theme={theme}>
+        <AuthNavigation />
+      </NavigationContainer>
+    </Provider>
   );
 }
 

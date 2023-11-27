@@ -1,4 +1,5 @@
 import {
+  Alert,
   Linking,
   SafeAreaView,
   ScrollView,
@@ -13,27 +14,96 @@ import Input from '../../components/Input';
 import Button from '../../components/Button';
 import {color} from '../../constants/color';
 import AppPressable from '../../constants/AppPressable';
-import CheckBox from '@react-native-community/checkbox';
 import Checkbox from '../../components/Checkbox';
 import {PRIVACY_CONDITIONS} from '../../components/links';
+import {createUserWithEmailAndPassword} from 'firebase/auth';
+import {auth} from '../../../firebase.config';
 
 const Signup = ({navigation}) => {
   const [isChecked, setIsChecked] = useState(false);
+
+  const [values, setValues] = useState({
+    name: '',
+    lastName: '',
+    email: '',
+    password: '',
+    confirmPass: '',
+  });
+  console.log(values.email);
   const handleCheckbox = () => {
     setIsChecked(val => !val);
   };
+
   const openLinks = link => {
     Linking.openURL(link);
   };
+  const inputHandler = (val, key) => {
+    setValues(pre => ({...pre, [key]: val}));
+  };
+
+  const signupHandler = async () => {
+    if (Object.values(values).some(value => !value)) {
+      return Alert.alert('All fields required');
+    }
+
+    if (values.password !== values.confirmPass) {
+      return Alert.alert('Error', 'Passwords do not match');
+    }
+
+    if (!isChecked) {
+      return Alert.alert('Please agree to terms and conditions');
+    }
+
+    try {
+      const response = await createUserWithEmailAndPassword(
+        auth,
+        values.email,
+        values.password,
+      );
+      console.log('User created successfully:', response);
+    } catch (error) {
+      if (error.code === 'auth/email-already-in-use') {
+        console.log('That email address is already in use!');
+      } else if (error.code === 'auth/invalid-email') {
+        console.log('That email address is invalid!');
+      }
+
+      console.error('Error creating user:', error);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         <Title>Join the hub!</Title>
-        <Input placeholder="First Name" />
-        <Input placeholder="Last Name" />
-        <Input placeholder="Email" keyboardType="email-address" />
-        <Input placeholder="Password" secureTextEntry />
-        <Input placeholder="Confirm Password" secureTextEntry />
+        <Input
+          placeholder="First Name"
+          values={values.name}
+          onChangeText={text => inputHandler(text, 'name')}
+        />
+        <Input
+          placeholder="Last Name"
+          values={values.lastName}
+          onChangeText={text => inputHandler(text, 'lastName')}
+        />
+        <Input
+          placeholder="Email"
+          keyboardType="email-address"
+          values={values.email}
+          onChangeText={text => inputHandler(text, 'email')}
+        />
+        <Input
+          placeholder="Password"
+          secureTextEntry
+          values={values.password}
+          onChangeText={text => inputHandler(text, 'password')}
+        />
+        <Input
+          placeholder="Confirm Password"
+          secureTextEntry
+          values={values.confirmPass}
+          onChangeText={text => inputHandler(text, 'confirmPass')}
+        />
 
         <View style={styles.agreeContainer}>
           <Checkbox checked={isChecked} onPress={handleCheckbox} />
@@ -53,7 +123,11 @@ const Signup = ({navigation}) => {
             </Text>
           </AppPressable>
         </View>
-        <Button title={'Create account'} backgroundColor={color.blue} />
+        <Button
+          title={'Create account'}
+          backgroundColor={color.blue}
+          onPress={signupHandler}
+        />
         <View style={styles.footerContainer}>
           <Text style={styles.footerText}>Already registered?</Text>
           <AppPressable onPress={() => navigation.navigate('Sign In')}>
